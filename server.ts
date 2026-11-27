@@ -203,6 +203,7 @@ async function verifyFirebaseTeacherIdToken(
 
 async function startServer() {
   const app = express();
+  app.set('trust proxy', 1);
   app.disable('x-powered-by');
   app.use(express.json({ limit: '64kb' }));
 
@@ -307,7 +308,12 @@ async function startServer() {
     res.json({ authenticated: true, expiresAt: check.expiresAt, adminLevel: check.adminLevel });
   });
 
-  if (process.env.NODE_ENV !== 'production') {
+  const isProduction =
+    process.env.NODE_ENV === 'production' ||
+    process.env.npm_lifecycle_event === 'start' ||
+    Boolean(process.env.K_SERVICE);
+
+  if (!isProduction) {
     const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
       server: { middlewareMode: true },
@@ -316,8 +322,17 @@ async function startServer() {
     app.use(vite.middlewares);
   } else {
     const distPath = path.resolve(__dirname, 'dist');
-    app.use(express.static(distPath));
+    app.use(
+      express.static(distPath, {
+        setHeaders: (res, filePath) => {
+          if (filePath.endsWith('.html')) {
+            res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+          }
+        },
+      })
+    );
     app.get('*', (_req: Request, res: Response) => {
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
       res.sendFile(path.join(distPath, 'index.html'));
     });
   }
