@@ -1,0 +1,140 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAuthenticated() {
+      return request.auth != null && request.auth.token.email_verified == true;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isSuperAdmin() {
+      return isAuthenticated() &&
+        request.auth.token.email is string &&
+        request.auth.token.email.lower() == 'trangpt50@fpt.edu.vn';
+    }
+
+    function isFptTeacherEmail() {
+      return isAuthenticated() &&
+        request.auth.token.email is string &&
+        request.auth.token.email.lower().matches('^[^@]+@fpt\\.edu\\.vn$');
+    }
+
+    function isAdmin() {
+      return isSuperAdmin() ||
+        isFptTeacherEmail() ||
+        (isAuthenticated() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)));
+    }
+
+    function hasOnlyAllowedFields(data, allowed) {
+      return data.keys().hasOnly(allowed);
+    }
+
+    function hasRequiredFields(data, required) {
+      return data.keys().hasAll(required);
+    }
+
+    function isValidUserProfile(data) {
+      return hasRequiredFields(data, ['uid', 'fullName', 'email', 'role', 'updatedAt']) &&
+        hasOnlyAllowedFields(data, ['uid', 'fullName', 'email', 'role', 'className', 'teacherName', 'updatedAt']) &&
+        data.uid is string && data.uid.size() > 0 && data.uid.size() <= 128 &&
+        data.fullName is string && data.fullName.size() >= 1 && data.fullName.size() <= 120 &&
+        data.email is string && data.email.size() >= 3 && data.email.size() <= 200 &&
+        (data.role == 'student' || data.role == 'teacher') &&
+        (!('className' in data) || (data.className is string && data.className.size() <= 60)) &&
+        (!('teacherName' in data) || (data.teacherName is string && data.teacherName.size() <= 120)) &&
+        data.updatedAt is timestamp;
+    }
+
+    function isValidAttemptCreate(data) {
+      return hasRequiredFields(data, [
+          'uid', 'fullName', 'email', 'className', 'teacherName',
+          'examTitle', 'mode', 'correct', 'wrong', 'skipped',
+          'total', 'score', 'durationSeconds', 'createdAt'
+        ]) &&
+        hasOnlyAllowedFields(data, [
+          'uid', 'fullName', 'email', 'className', 'teacherName',
+          'examTitle', 'mode', 'correct', 'wrong', 'skipped',
+          'total', 'correctCount', 'score', 'durationSeconds',
+          'details', 'clientTimestamp', 'createdAt'
+        ]) &&
+        data.uid is string && data.uid == request.auth.uid &&
+        data.fullName is string && data.fullName.size() >= 1 && data.fullName.size() <= 120 &&
+        data.email is string && data.email.size() >= 3 && data.email.size() <= 200 &&
+        data.className is string && data.className.size() <= 60 &&
+        data.teacherName is string && data.teacherName.size() <= 120 &&
+        data.examTitle is string && data.examTitle.size() >= 1 && data.examTitle.size() <= 240 &&
+        (data.mode == 'game' || data.mode == 'exam') &&
+        data.total is int && data.total >= 1 && data.total <= 100 &&
+        data.correct is int && data.correct >= 0 && data.correct <= data.total &&
+        data.wrong is int && data.wrong >= 0 && data.wrong <= data.total &&
+        data.skipped is int && data.skipped >= 0 && data.skipped <= data.total &&
+        data.score is number && data.score >= 0 && data.score <= 10 &&
+        data.durationSeconds is int && data.durationSeconds >= 0 && data.durationSeconds <= 86400 &&
+        (!('correctCount' in data) || (data.correctCount is string && data.correctCount.size() <= 40)) &&
+        (!('clientTimestamp' in data) || data.clientTimestamp is int) &&
+        (!('details' in data) || (data.details is list && data.details.size() <= 50 && (data.details.size() == 0 || data.details[0] is map))) &&
+        data.createdAt == request.time;
+    }
+
+    match /users/{userId} {
+      allow get: if isValidId(userId) && (isOwner(userId) || isAdmin());
+      allow list: if isAdmin();
+      allow create: if isValidId(userId) &&
+        isOwner(userId) &&
+        request.resource.data.uid == userId &&
+        isValidUserProfile(request.resource.data) &&
+        (request.resource.data.role == 'student' || isAdmin());
+      allow update: if isValidId(userId) && (
+        (
+          isOwner(userId) &&
+          request.resource.data.uid == resource.data.uid &&
+          isValidUserProfile(request.resource.data) &&
+          (request.resource.data.role == resource.data.role || isAdmin())
+        ) || (
+          isSuperAdmin() &&
+          request.resource.data.uid == resource.data.uid &&
+          isValidUserProfile(request.resource.data)
+        )
+      );
+      allow delete: if isValidId(userId) && isSuperAdmin();
+    }
+
+    match /attempts/{attemptId} {
+      allow get: if isValidId(attemptId) && ((isAuthenticated() && resource.data.uid == request.auth.uid) || isAdmin());
+      allow list: if (isAuthenticated() && resource.data.uid == request.auth.uid) || isAdmin();
+      allow create: if isValidId(attemptId) && isAuthenticated() && isValidAttemptCreate(request.resource.data);
+      allow update: if false;
+      allow delete: if isValidId(attemptId) && isSuperAdmin();
+    }
+
+    match /admins/{userId} {
+      allow get: if isValidId(userId) && (isOwner(userId) || isAdmin());
+      allow list: if isAdmin();
+      allow create, update: if isValidId(userId) &&
+        isSuperAdmin() &&
+        hasRequiredFields(request.resource.data, ['email', 'addedAt']) &&
+        hasOnlyAllowedFields(request.resource.data, ['email', 'addedAt']) &&
+        request.resource.data.email is string &&
+        request.resource.data.email.size() >= 3 &&
+        request.resource.data.email.size() <= 200 &&
+        request.resource.data.addedAt is timestamp;
+      allow delete: if isValidId(userId) && isSuperAdmin();
+    }
+
+    match /test/connection {
+      allow read: if isAuthenticated();
+      allow write: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

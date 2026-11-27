@@ -1,0 +1,86 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Hồ sơ người dùng đã xác thực Google Sign-In trong Đấu trường Văn học.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Firebase Auth UID của người dùng." },
+        "fullName": { "type": "string", "description": "Tên hiển thị của sinh viên hoặc giảng viên." },
+        "email": { "type": "string", "description": "Địa chỉ email Google đã xác thực." },
+        "role": { "type": "string", "enum": ["student", "teacher"], "description": "Vai trò phân quyền." },
+        "className": { "type": "string", "description": "Lớp học (bắt buộc với sinh viên)." },
+        "teacherName": { "type": "string", "description": "Tên giảng viên hướng dẫn." },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Thời điểm cập nhật gần nhất." }
+      },
+      "required": ["uid", "fullName", "email", "role", "updatedAt"]
+    },
+    "AttemptRecord": {
+      "title": "AttemptRecord",
+      "description": "Một lượt làm bài thi thử hoặc luyện game được ghi nhận độc lập trên Firestore.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Firebase Auth UID của sinh viên/người làm bài." },
+        "fullName": { "type": "string", "description": "Họ tên / Tên người làm bài." },
+        "email": { "type": "string", "description": "Email người làm bài." },
+        "className": { "type": "string", "description": "Lớp của sinh viên." },
+        "teacherName": { "type": "string", "description": "Tên giảng viên hướng dẫn." },
+        "examTitle": { "type": "string", "description": "Tên đề thi hoặc chuyên đề luyện tập." },
+        "mode": { "type": "string", "enum": ["game", "exam"], "description": "Chế độ làm bài." },
+        "correct": { "type": "number", "description": "Số câu trả lời đúng." },
+        "wrong": { "type": "number", "description": "Số câu trả lời sai." },
+        "skipped": { "type": "number", "description": "Số câu bỏ trống chưa làm." },
+        "total": { "type": "number", "description": "Tổng số câu hỏi trong lượt làm bài." },
+        "correctCount": { "type": "string", "description": "Chuỗi hiển thị số câu đúng/tổng." },
+        "score": { "type": "number", "description": "Điểm số quy đổi thang 10." },
+        "durationSeconds": { "type": "number", "description": "Thời gian làm bài tính bằng giây." },
+        "details": {
+          "type": "array",
+          "description": "Danh sách chi tiết từng câu hỏi đã làm trong lượt."
+        },
+        "clientTimestamp": { "type": "number", "description": "Mốc thời gian client (ms)." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Thời gian hoàn thành do server ghi nhận." }
+      },
+      "required": [
+        "uid",
+        "fullName",
+        "email",
+        "className",
+        "teacherName",
+        "examTitle",
+        "mode",
+        "correct",
+        "wrong",
+        "skipped",
+        "total",
+        "score",
+        "durationSeconds",
+        "createdAt"
+      ]
+    },
+    "AdminEntry": {
+      "title": "AdminEntry",
+      "description": "Danh sách giảng viên được cấp quyền quản trị bảng điểm toàn bộ sinh viên.",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "description": "Email giảng viên được cấp quyền." },
+        "addedAt": { "type": "string", "format": "date-time", "description": "Thời điểm cấp quyền." }
+      },
+      "required": ["email", "addedAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "Hồ sơ cá nhân của từng người dùng theo UID."
+    },
+    "/attempts/{attemptId}": {
+      "schema": "AttemptRecord",
+      "description": "Kho dữ liệu lượt làm bài trực tuyến đồng bộ thời gian thực."
+    },
+    "/admins/{userId}": {
+      "schema": "AdminEntry",
+      "description": "Bảng phân quyền giảng viên quản trị."
+    }
+  }
+}

@@ -171,8 +171,8 @@
             <div id="navbar-user-badge" class="hidden items-center gap-2 px-3 py-1 rounded-full bg-white border-2 border-[#1E293B] shadow-[0_2px_0_#1E293B] max-w-full">
               <span class="w-2 h-2 rounded-full bg-[#28C76F] border border-[#1E293B] shrink-0"></span>
               <span id="navbar-user-text" class="text-[11px] sm:text-xs font-extrabold text-[#1E293B] truncate max-w-[260px] sm:max-w-[380px]"></span>
-              <button id="navbar-teacher-btn" type="button" onclick="renderTeacherCornerModal()" class="hidden px-2 py-0.5 rounded-full bg-[#EAFBF1] hover:bg-[#28C76F] text-[#15803D] hover:text-white border border-[#1E293B] text-[10px] sm:text-[11px] font-extrabold transition-colors whitespace-nowrap cursor-pointer">
-                Bảng điểm SV
+              <button id="navbar-teacher-btn" type="button" onclick="openAdminTabOrGate()" class="hidden px-2 py-0.5 rounded-full bg-[#EAFBF1] hover:bg-[#28C76F] text-[#15803D] hover:text-white border border-[#1E293B] text-[10px] sm:text-[11px] font-extrabold transition-colors whitespace-nowrap cursor-pointer">
+                🛡️ Quản trị
               </button>
               <button type="button" onclick="logoutAccount()" class="px-2 py-0.5 rounded-full bg-[#FFF3EB] hover:bg-[#FF7A2F] text-[#C2410C] hover:text-white border border-[#1E293B] text-[10px] sm:text-[11px] font-extrabold transition-colors whitespace-nowrap cursor-pointer">
                 Đăng xuất / Đổi tài khoản
@@ -198,7 +198,7 @@
           </div>
         </div>
 
-        <!-- Row 2: 6 Main Navigation Tabs -->
+        <!-- Row 2: 7 Main Navigation Tabs -->
         <nav class="w-full flex items-center gap-1.5 overflow-x-auto nav-scroll pb-0.5" aria-label="Điều hướng chính">
           <button type="button" data-tab="knowledge" onclick="switchTab('knowledge')" class="tab-btn whitespace-nowrap shrink-0 px-3 py-1.5 text-xs sm:text-[13px] font-bold rounded-xl border-2 transition-all">
             1. Kiến thức & Đọc văn bản
@@ -218,6 +218,9 @@
           <button type="button" data-tab="history" onclick="switchTab('history')" class="tab-btn whitespace-nowrap shrink-0 px-3 py-1.5 text-xs sm:text-[13px] font-bold rounded-xl border-2 transition-all">
             📜 Lịch sử làm bài
           </button>
+          <button id="nav-tab-admin" type="button" data-tab="admin" onclick="openAdminTabOrGate()" class="hidden tab-btn whitespace-nowrap shrink-0 px-3 py-1.5 text-xs sm:text-[13px] font-bold rounded-xl border-2 transition-all">
+            🛡️ Quản trị
+          </button>
         </nav>
       </div>
     </header>
@@ -230,6 +233,7 @@
       <section id="view-notebook" class="tab-view hidden"></section>
       <section id="view-mistakes" class="tab-view hidden"></section>
       <section id="view-history" class="tab-view hidden"></section>
+      <section id="view-admin" class="tab-view hidden"></section>
     </main>
 
     <!-- Footer -->
@@ -237,7 +241,7 @@
       <div class="max-w-[1320px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-600">
         <p class="font-extrabold text-[#1E293B] uppercase tracking-wide">ĐẤU TRƯỜNG VĂN HỌC · Đổi mới cách học – Nâng tầm tư duy</p>
         <div class="flex flex-wrap items-center gap-4">
-          <button type="button" onclick="openTeacherCornerPinModal()" class="font-extrabold text-[#28C76F] underline underline-offset-2 hover:text-[#15803D] cursor-pointer">Góc Giáo Viên (PIN: 2026)</button>
+          <button id="footer-admin-btn" type="button" onclick="openAdminTabOrGate()" class="hidden font-extrabold text-[#28C76F] underline underline-offset-2 hover:text-[#15803D] cursor-pointer">🛡️ Quản trị (Giảng viên)</button>
           <button type="button" onclick="openImportModal(null)" class="font-bold text-[#2B88FF] underline underline-offset-2 hover:text-[#1D6FE0] cursor-pointer">Nạp bộ đề (.txt / .docx)</button>
           <button type="button" onclick="confirmResetProgress()" class="font-bold text-rose-600 underline underline-offset-2 hover:text-rose-800 cursor-pointer">Đặt lại dữ liệu học</button>
         </div>
@@ -268,8 +272,33 @@
           </div>
 
           <p class="text-xs sm:text-sm text-slate-600 font-medium mb-4 leading-relaxed">
-            Đăng nhập bằng Email để sử dụng phần mềm. Hệ thống tự động phân quyền <span class="font-bold text-[#1E293B]">👩‍🏫 Giáo viên</span> với email <span class="font-mono font-bold text-[#2B88FF]">@fpt.edu.vn</span> / <span class="font-mono font-bold text-[#2B88FF]">@fpt.</span> và <span class="font-bold text-[#1E293B]">🎓 Sinh viên</span> với các email khác.
+            Đăng nhập bằng <span class="font-bold text-[#1E293B]">tài khoản Google</span> để đồng bộ lịch sử làm bài trực tuyến giữa mọi thiết bị. Sinh viên chỉ xem được kết quả và lịch sử làm bài của riêng mình.
           </p>
+
+          <!-- Bước 1: Xác thực Google -->
+          <div class="mb-4 p-3.5 rounded-2xl border-2 border-[#1E293B] bg-[#F8FAFC]">
+            <div id="login-google-unsigned" class="flex flex-col gap-2.5">
+              <p class="text-xs font-extrabold text-[#1E293B]">Bước 1: Xác thực tài khoản Google của bạn</p>
+              <button id="btn-google-signin" type="button" onclick="handleGoogleLoginClick()" class="study-btn w-full py-2.5 px-4 bg-white hover:bg-[#EBF4FF] text-[#1E293B] text-sm font-extrabold flex items-center justify-center gap-2.5">
+                <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                  <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17Z"/>
+                  <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.11-6.72-4.96H1.29v3.14C3.26 21.3 7.31 24 12 24Z"/>
+                  <path fill="#FBBC05" d="M5.28 14.24c-.24-.72-.38-1.49-.38-2.24s.14-1.52.38-2.24V6.62H1.29C.47 8.24 0 10.06 0 12s.47 3.76 1.29 5.38l3.99-3.14Z"/>
+                  <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.62l3.99 3.14c.95-2.85 3.6-4.96 6.72-4.96Z"/>
+                </svg>
+                <span>Đăng nhập bằng Google</span>
+              </button>
+            </div>
+            <div id="login-google-signed" class="hidden items-center justify-between gap-2">
+              <div class="min-w-0">
+                <p class="text-[11px] font-extrabold text-[#15803D]">✓ Đã xác thực Google</p>
+                <p id="login-google-email-label" class="text-xs font-mono font-bold text-[#1E293B] truncate"></p>
+              </div>
+              <button type="button" onclick="handleGoogleSwitchAccount()" class="px-2.5 py-1 rounded-lg border-2 border-[#1E293B] bg-white hover:bg-[#FFF3EB] text-[11px] font-extrabold text-[#1E293B] whitespace-nowrap cursor-pointer">
+                Đổi Gmail
+              </button>
+            </div>
+          </div>
 
           <form id="login-gate-form" onsubmit="submitLoginGate(event)" class="space-y-3.5" novalidate>
             <div>
@@ -281,13 +310,12 @@
 
             <div>
               <label for="login-email" class="block text-xs font-extrabold text-[#1E293B] mb-1">
-                2. Địa chỉ Email <span class="text-rose-600">*</span>
+                2. Địa chỉ Email đã xác thực <span class="text-rose-600">*</span>
               </label>
-              <input id="login-email" type="email" required oninput="handleLoginEmailInput()" placeholder="Ví dụ: an@gmail.com hoặc trangpt@fpt.edu.vn" class="w-full px-3.5 py-2.5 rounded-xl border-2 border-[#1E293B] bg-white text-sm font-semibold text-[#1E293B] placeholder:text-slate-400" />
-              <p class="text-[11px] text-slate-500 mt-1">Tự động chuyển chữ thường và phân quyền theo đuôi email.</p>
+              <input id="login-email" type="email" required readonly placeholder="Sẽ tự động điền sau khi đăng nhập Google" class="w-full px-3.5 py-2.5 rounded-xl border-2 border-[#1E293B] bg-[#F8FAFC] text-sm font-semibold text-[#1E293B] placeholder:text-slate-400" />
             </div>
 
-            <!-- Nhóm dành cho Sinh viên (email thường) -->
+            <!-- Nhóm dành cho Sinh viên -->
             <div id="login-student-fields" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label for="login-class" class="block text-xs font-extrabold text-[#1E293B] mb-1">
@@ -303,12 +331,9 @@
               </div>
             </div>
 
-            <!-- Nhóm dành cho Giáo viên (@fpt.edu.vn / @fpt.) -->
-            <div id="login-teacher-fields" class="hidden">
-              <label for="login-pin" class="block text-xs font-extrabold text-[#1E293B] mb-1">
-                3. Mã PIN quản trị (2026) <span class="text-rose-600">*</span>
-              </label>
-              <input id="login-pin" type="password" inputmode="numeric" placeholder="Nhập mã PIN quản trị (2026)" class="w-full px-3.5 py-2.5 rounded-xl border-2 border-[#1E293B] bg-[#EAFBF1] text-sm font-mono font-bold text-[#1E293B] placeholder:text-slate-500" />
+            <!-- Thông báo dành cho Giảng viên đã xác thực -->
+            <div id="login-teacher-fields" class="hidden p-3 rounded-xl border-2 border-[#1E293B] bg-[#EAFBF1] text-xs font-semibold text-[#15803D]">
+              <span id="login-teacher-tier-note">Tài khoản Giảng viên @fpt.edu.vn đã xác thực! Sau khi vào hệ thống, bạn có thể mở mục <span class="font-extrabold">🛡️ Quản trị</span> và nhập mật khẩu quản trị để xem bảng điểm sinh viên.</span>
             </div>
 
             <p id="login-gate-error" class="hidden text-xs font-extrabold text-rose-700 bg-[#FFF1F2] border-2 border-rose-500 rounded-xl px-3 py-2"></p>
@@ -323,7 +348,7 @@
 
     <!-- In-page Modal Container -->
     <div id="modal-backdrop" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-[2px] hidden items-center justify-center p-4" role="dialog" aria-modal="true">
-      <div id="modal-card" class="study-card w-full max-w-2xl p-6 bg-white max-h-[90vh] overflow-y-auto"></div>
+      <div id="modal-card" class="study-card w-full max-w-3xl p-6 bg-white max-h-[90vh] overflow-y-auto"></div>
     </div>
 
     <!-- Toast Notification -->
@@ -331,6 +356,7 @@
 
     <!-- Hidden File Input for TXT / DOCX Import -->
     <input type="file" id="question-file-input" accept=".txt,.docx" class="hidden" />
+    <script type="module" src="/src/firebaseBridge.ts"></script>
     <script>
       'use strict';
 
@@ -1080,13 +1106,33 @@
       ];
 
       // =========================================================================
-      // 4. TRẠNG THÁI HỆ THỐNG, ĐĂNG NHẬP & ĐỒNG BỘ GOOGLE SHEETS
+      // 4. TRẠNG THÁI HỆ THỐNG, ĐĂNG NHẬP GOOGLE & ĐỒNG BỘ FIRESTORE REAL-TIME
       // =========================================================================
       const STORAGE_KEY = 'dau_truong_van_hoc_v2026';
       const LEGACY_STORAGE_KEY = 'hoc_van_cung_co_trang_v2026';
-      const GLOBAL_SCORES_KEY = 'dau_truong_van_hoc_all_scores_v2026';
       const GOOGLE_SCRIPT_URL = '[DÁN_LINK_WEB_APP_URL_CỦA_BẠN_VÀO_ĐÂY]';
-      const TEACHER_PIN = '2026';
+
+      // Trạng thái đồng bộ trực tuyến (Firebase Auth + Firestore)
+      let firebaseAuthState = {
+        ready: false,
+        signedIn: false,
+        uid: '',
+        email: '',
+        displayName: '',
+        isAdmin: false,
+        adminLevel: 0,
+        profile: null
+      };
+      let firebaseStudentAttempts = [];
+      let firebaseAdminAttempts = [];
+      let adminUnlocked = false;
+      let adminStatusInfo = { configured: true, mode: 'env' };
+      let adminFilters = {
+        query: '',
+        className: 'all',
+        examTitle: 'all',
+        mode: 'all'
+      };
 
       function getTodayKey() {
         const d = new Date();
@@ -1181,36 +1227,21 @@
         updateHeaderStats();
       }
 
-      function loadGlobalScores() {
-        try {
-          const raw = localStorage.getItem(GLOBAL_SCORES_KEY);
-          const arr = raw ? JSON.parse(raw) : [];
-          return Array.isArray(arr) ? arr : [];
-        } catch (e) {
-          return [];
-        }
-      }
-
-      function saveGlobalScores(list) {
-        try {
-          localStorage.setItem(GLOBAL_SCORES_KEY, JSON.stringify(list));
-        } catch (e) {
-          // Ignore quota errors
-        }
-      }
-
       function detectRoleFromEmail(email) {
         const e = (email || '').trim().toLowerCase();
-        if (/@fpt\./i.test(e) || e.endsWith('@fpt.edu.vn')) return 'teacher';
+        if (firebaseAuthState.signedIn && firebaseAuthState.isAdmin && firebaseAuthState.email === e) {
+          return 'teacher';
+        }
         return 'student';
       }
 
       function getCurrentUser() {
         const u = state.user || {};
-        const email = (u.email || '').trim().toLowerCase();
-        const role = u.role || detectRoleFromEmail(email);
+        const email = (firebaseAuthState.signedIn ? firebaseAuthState.email : (u.email || '')).trim().toLowerCase();
+        const role = firebaseAuthState.signedIn && firebaseAuthState.isAdmin ? 'teacher' : 'student';
         return {
-          fullName: (u.fullName || state.studentName || '').trim(),
+          uid: firebaseAuthState.uid || '',
+          fullName: (u.fullName || state.studentName || firebaseAuthState.displayName || '').trim(),
           email,
           role,
           className: (u.className || state.studentClass || '').trim(),
@@ -1219,6 +1250,7 @@
       }
 
       function isLoggedIn() {
+        if (!firebaseAuthState.signedIn) return false;
         const u = getCurrentUser();
         if (!u.fullName || !u.email || !u.email.includes('@')) return false;
         if (u.role === 'student') {
@@ -1231,6 +1263,13 @@
         const badge = document.getElementById('navbar-user-badge');
         const textEl = document.getElementById('navbar-user-text');
         const teacherBtn = document.getElementById('navbar-teacher-btn');
+        const navAdminTab = document.getElementById('nav-tab-admin');
+        const footerAdminBtn = document.getElementById('footer-admin-btn');
+        const canAccessAdmin = Boolean(firebaseAuthState.signedIn && firebaseAuthState.isAdmin);
+
+        if (navAdminTab) navAdminTab.classList.toggle('hidden', !canAccessAdmin);
+        if (footerAdminBtn) footerAdminBtn.classList.toggle('hidden', !canAccessAdmin);
+
         if (!badge || !textEl) return;
         if (!isLoggedIn()) {
           badge.classList.add('hidden');
@@ -1240,9 +1279,13 @@
           return;
         }
         const u = getCurrentUser();
-        if (u.role === 'teacher') {
-          textEl.textContent = `👩‍🏫 GV: ${u.fullName}`;
-          if (teacherBtn) teacherBtn.classList.remove('hidden');
+        if (canAccessAdmin) {
+          const isLevel1 = firebaseAuthState.adminLevel === 1;
+          textEl.textContent = isLevel1 ? `👑 GV Mức 1: ${u.fullName}` : `👩‍🏫 GV Mức 2: ${u.fullName}`;
+          if (teacherBtn) {
+            teacherBtn.textContent = isLevel1 ? '👑 Quản trị Mức 1' : '🛡️ Quản trị Mức 2';
+            teacherBtn.classList.remove('hidden');
+          }
         } else {
           textEl.textContent = `🎓 ${u.fullName} · Lớp ${u.className} · GV: ${u.teacherName}`;
           if (teacherBtn) teacherBtn.classList.add('hidden');
@@ -1251,22 +1294,64 @@
         badge.classList.add('flex');
       }
 
+      function updateLoginGoogleSection() {
+        const unsignedEl = document.getElementById('login-google-unsigned');
+        const signedEl = document.getElementById('login-google-signed');
+        const emailLabel = document.getElementById('login-google-email-label');
+        const emailEl = document.getElementById('login-email');
+        const nameEl = document.getElementById('login-fullname');
+        const classEl = document.getElementById('login-class');
+        const teacherEl = document.getElementById('login-teacher');
+
+        if (firebaseAuthState.signedIn) {
+          if (unsignedEl) unsignedEl.classList.add('hidden');
+          if (signedEl) {
+            signedEl.classList.remove('hidden');
+            signedEl.classList.add('flex');
+          }
+          if (emailLabel) emailLabel.textContent = firebaseAuthState.email;
+          if (emailEl) emailEl.value = firebaseAuthState.email;
+          if (firebaseAuthState.profile) {
+            if (nameEl && !nameEl.value.trim()) nameEl.value = firebaseAuthState.profile.fullName || '';
+            if (classEl && !classEl.value.trim()) classEl.value = firebaseAuthState.profile.className || '';
+            if (teacherEl && !teacherEl.value.trim()) teacherEl.value = firebaseAuthState.profile.teacherName || '';
+          } else if (nameEl && !nameEl.value.trim() && firebaseAuthState.displayName) {
+            nameEl.value = firebaseAuthState.displayName;
+          }
+        } else {
+          if (unsignedEl) unsignedEl.classList.remove('hidden');
+          if (signedEl) {
+            signedEl.classList.add('hidden');
+            signedEl.classList.remove('flex');
+          }
+          if (emailEl) emailEl.value = '';
+        }
+        handleLoginEmailInput();
+      }
+
       function handleLoginEmailInput() {
         const emailEl = document.getElementById('login-email');
         const roleBadge = document.getElementById('login-role-badge');
         const studentFields = document.getElementById('login-student-fields');
         const teacherFields = document.getElementById('login-teacher-fields');
+        const teacherTierNote = document.getElementById('login-teacher-tier-note');
         const submitBtn = document.getElementById('login-submit-btn');
-        const role = detectRoleFromEmail(emailEl ? emailEl.value : '');
+        const role = detectRoleFromEmail(emailEl ? emailEl.value : firebaseAuthState.email);
 
         if (role === 'teacher') {
+          const isLevel1 = firebaseAuthState.adminLevel === 1;
           if (roleBadge) {
-            roleBadge.textContent = '👩‍🏫 Giáo viên';
+            roleBadge.textContent = isLevel1 ? '👑 Quản trị Mức 1' : '👩‍🏫 GV · Quản trị Mức 2';
             roleBadge.className = 'px-2.5 py-1 rounded-full border-2 border-[#1E293B] bg-[#EAFBF1] text-[11px] font-extrabold text-[#15803D] whitespace-nowrap';
+          }
+          if (teacherTierNote) {
+            teacherTierNote.innerHTML = isLevel1
+              ? 'Tài khoản <span class="font-extrabold">Quản trị viên chính (Mức 1)</span> đã xác thực! Mở mục <span class="font-extrabold">🛡️ Quản trị</span> và nhập mật khẩu để quản lý toàn hệ thống.'
+              : 'Tài khoản <span class="font-extrabold">Giáo viên (@fpt.edu.vn) — Quyền Quản trị Mức 2</span> đã xác thực! Sau khi vào hệ thống, mở mục <span class="font-extrabold">🛡️ Quản trị</span> và nhập mật khẩu để xem & xuất bảng điểm sinh viên.';
           }
           if (studentFields) studentFields.classList.add('hidden');
           if (teacherFields) teacherFields.classList.remove('hidden');
-          if (submitBtn) submitBtn.textContent = 'Mở Quản Lý Bảng Điểm Giáo Viên →';
+          if (submitBtn) submitBtn.textContent = 'Vào Đấu Trường Văn Học (Giáo viên) →';
         } else {
           if (roleBadge) {
             roleBadge.textContent = '🎓 Sinh viên';
@@ -1278,6 +1363,50 @@
         }
       }
 
+      async function handleGoogleLoginClick() {
+        const errEl = document.getElementById('login-gate-error');
+        const btn = document.getElementById('btn-google-signin');
+        if (errEl) {
+          errEl.textContent = '';
+          errEl.classList.add('hidden');
+        }
+        if (!window.LiteraryFirebase) {
+          showToast('Hệ thống đồng bộ đang khởi tạo, vui lòng thử lại sau 1 giây.', 'info');
+          return;
+        }
+        try {
+          if (btn) btn.disabled = true;
+          const info = await window.LiteraryFirebase.signInWithGoogle();
+          firebaseAuthState = Object.assign({}, firebaseAuthState, { ready: true, signedIn: true }, info);
+          updateLoginGoogleSection();
+          playSound('win');
+          showToast(`Đã xác thực Google: ${info.email}`, 'success');
+        } catch (err) {
+          if (errEl) {
+            errEl.textContent = 'Không thể đăng nhập Google: ' + (err && err.message ? err.message : 'Đã hủy hoặc bị chặn popup.');
+            errEl.classList.remove('hidden');
+          }
+        } finally {
+          if (btn) btn.disabled = false;
+        }
+      }
+
+      async function handleGoogleSwitchAccount() {
+        if (window.LiteraryFirebase) {
+          await window.LiteraryFirebase.signOutGoogle();
+        }
+        adminUnlocked = false;
+        firebaseAdminAttempts = [];
+        firebaseStudentAttempts = [];
+        const nameEl = document.getElementById('login-fullname');
+        const classEl = document.getElementById('login-class');
+        const teacherEl = document.getElementById('login-teacher');
+        if (nameEl) nameEl.value = '';
+        if (classEl) classEl.value = '';
+        if (teacherEl) teacherEl.value = '';
+        await handleGoogleLoginClick();
+      }
+
       function openLoginGate(prefill = true) {
         const gate = document.getElementById('login-gate');
         if (!gate) return;
@@ -1286,23 +1415,20 @@
         const emailEl = document.getElementById('login-email');
         const classEl = document.getElementById('login-class');
         const teacherEl = document.getElementById('login-teacher');
-        const pinEl = document.getElementById('login-pin');
         const errEl = document.getElementById('login-gate-error');
         if (prefill) {
           if (nameEl) nameEl.value = u.fullName || '';
           if (emailEl) emailEl.value = u.email || '';
           if (classEl) classEl.value = u.className || '';
           if (teacherEl) teacherEl.value = u.teacherName || '';
-          if (pinEl) pinEl.value = '';
         }
         if (errEl) {
           errEl.textContent = '';
           errEl.classList.add('hidden');
         }
-        handleLoginEmailInput();
+        updateLoginGoogleSection();
         gate.classList.remove('hidden');
         gate.classList.add('flex');
-        if (nameEl && !nameEl.value) nameEl.focus();
       }
 
       function closeLoginGate() {
@@ -1312,35 +1438,34 @@
         gate.classList.remove('flex');
       }
 
-      function submitLoginGate(e) {
+      async function submitLoginGate(e) {
         e.preventDefault();
         const nameEl = document.getElementById('login-fullname');
         const emailEl = document.getElementById('login-email');
         const classEl = document.getElementById('login-class');
         const teacherEl = document.getElementById('login-teacher');
-        const pinEl = document.getElementById('login-pin');
         const errEl = document.getElementById('login-gate-error');
 
+        if (!firebaseAuthState.signedIn) {
+          if (errEl) {
+            errEl.textContent = 'Vui lòng bấm “Đăng nhập bằng Google” ở Bước 1 trước khi tiếp tục.';
+            errEl.classList.remove('hidden');
+          }
+          return;
+        }
+
         const fullName = nameEl ? nameEl.value.trim() : '';
-        const email = emailEl ? emailEl.value.trim().toLowerCase() : '';
+        const email = (firebaseAuthState.email || (emailEl ? emailEl.value : '')).trim().toLowerCase();
         const role = detectRoleFromEmail(email);
         const className = role === 'student' && classEl ? classEl.value.trim() : '';
         const teacherName = role === 'teacher'
           ? fullName
           : (teacherEl ? teacherEl.value.trim() : '');
-        const pinVal = pinEl ? pinEl.value.trim() : '';
 
-        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         let errorMsg = '';
         if (!fullName) {
           errorMsg = 'Vui lòng nhập Tên của bạn (không được để trống).';
-        } else if (!email || !email.includes('@') || !emailPattern.test(email)) {
-          errorMsg = 'Vui lòng nhập đúng định dạng Địa chỉ Email hợp lệ có dấu @ (ví dụ: an@gmail.com).';
-        } else if (role === 'teacher') {
-          if (pinVal !== TEACHER_PIN) {
-            errorMsg = 'Mã PIN quản trị chưa chính xác (mặc định: 2026).';
-          }
-        } else {
+        } else if (role === 'student') {
           if (!className) {
             errorMsg = 'Vui lòng nhập Lớp của bạn (ví dụ: PC2201).';
           } else if (!teacherName) {
@@ -1356,32 +1481,61 @@
           return;
         }
 
-        if (emailEl) emailEl.value = email;
         state.user = { fullName, email, role, className, teacherName };
         state.studentName = fullName;
         state.studentClass = className;
         saveState();
+
+        if (window.LiteraryFirebase) {
+          try {
+            await window.LiteraryFirebase.saveUserProfile({
+              fullName,
+              email,
+              role,
+              className,
+              teacherName
+            });
+          } catch (err) {
+            // Tiếp tục vào hệ thống dù lưu profile phụ gặp lỗi mạng tạm thời
+          }
+        }
+
         updateNavbarUserBadge();
         closeLoginGate();
         playSound('win');
         renderCurrentTab();
 
         if (role === 'teacher') {
-          showToast(`Chào mừng 👩‍🏫 GV ${fullName}! Đang mở bảng điểm sinh viên.`, 'success');
-          renderTeacherCornerModal();
+          showToast(`Chào mừng 👩‍🏫 GV ${fullName}! Bạn có thể mở mục “🛡️ Quản trị” để xem toàn bộ bảng điểm.`, 'success');
         } else {
           showToast(`Chào mừng 🎓 ${fullName} (Lớp ${className}) đã vào ĐẤU TRƯỜNG VĂN HỌC!`, 'success');
         }
       }
 
-      function logoutAccount() {
+      async function logoutAccount() {
+        adminUnlocked = false;
+        firebaseAdminAttempts = [];
+        firebaseStudentAttempts = [];
+        if (window.LiteraryFirebase) {
+          try {
+            window.LiteraryFirebase.lockAdminSession();
+            await window.LiteraryFirebase.signOutGoogle();
+          } catch (err) {
+            // Ignore signOut errors
+          }
+        }
         state.user = { fullName: '', email: '', role: 'student', className: '', teacherName: '' };
         state.studentName = '';
         state.studentClass = '';
         saveState();
         updateNavbarUserBadge();
         closeModal();
-        openLoginGate(true);
+        if (currentTab === 'admin') {
+          switchTab('knowledge');
+        } else {
+          renderCurrentTab();
+        }
+        openLoginGate(false);
         showToast('Đã đăng xuất. Vui lòng đăng nhập tài khoản khác để tiếp tục.', 'info');
       }
 
@@ -1396,37 +1550,58 @@
         return `${dd}/${mm}/${yyyy} · ${hh}:${min}:${ss}`;
       }
 
-      function recordAndSyncScore({ examTitle, correct, total }) {
+      function formatDurationVN(secs) {
+        const total = Math.max(0, Math.round(Number(secs) || 0));
+        const h = Math.floor(total / 3600);
+        const m = Math.floor((total % 3600) / 60);
+        const s = total % 60;
+        if (h > 0) return `${h} giờ ${String(m).padStart(2, '0')} phút ${String(s).padStart(2, '0')} giây`;
+        return `${m} phút ${String(s).padStart(2, '0')} giây`;
+      }
+
+      async function recordAndSyncScore({ examTitle, mode = 'game', correct, wrong = 0, skipped = 0, total, durationSeconds = 0, details = [] }) {
         const u = getCurrentUser();
         const safeTotal = Math.max(1, Number(total) || 1);
-        const safeCorrect = Math.max(0, Number(correct) || 0);
+        const safeCorrect = Math.max(0, Math.min(safeTotal, Number(correct) || 0));
+        const safeWrong = Math.max(0, Math.min(safeTotal, Number(wrong) || 0));
+        const safeSkipped = Math.max(0, Math.min(safeTotal, Number(skipped) || 0));
         const score = Number(((safeCorrect / safeTotal) * 10).toFixed(2));
         const now = Date.now();
         const teacherLabel = u.teacherName || 'Cô Trang';
-        const record = {
-          id: `att_${now}_${Math.random().toString(36).slice(2, 7)}`,
-          timestamp: now,
-          dateTimeStr: formatDateTimeVN(now),
+        const payload = {
           fullName: u.fullName || 'Sinh viên',
           className: u.className || 'Chưa nhập',
           email: u.email || '',
           teacherName: teacherLabel,
           examTitle: examTitle || 'Bài luyện tập',
+          mode: mode === 'exam' ? 'exam' : 'game',
           correct: safeCorrect,
+          wrong: safeWrong,
+          skipped: safeSkipped,
           total: safeTotal,
           correctCount: `${safeCorrect}/${safeTotal} câu`,
           score,
-          syncStatus: `✅ Đã gửi tới GV ${teacherLabel}`
+          durationSeconds: Math.max(0, Math.round(Number(durationSeconds) || 0)),
+          details: Array.isArray(details) ? details.slice(0, 50) : [],
+          clientTimestamp: now
         };
 
-        state.attemptHistory = [record].concat(state.attemptHistory || []);
-        saveState();
+        if (window.LiteraryFirebase && firebaseAuthState.signedIn) {
+          try {
+            const saved = await window.LiteraryFirebase.saveAttempt(payload);
+            if (!firebaseStudentAttempts.some((x) => x.id === saved.id)) {
+              firebaseStudentAttempts = [saved].concat(firebaseStudentAttempts);
+            }
+            if (currentTab === 'history') renderHistoryTab();
+            showToast('☁️ Đã lưu kết quả trực tuyến lên hệ thống!', 'success');
+          } catch (err) {
+            showToast('Lỗi đồng bộ trực tuyến: ' + (err && err.message ? err.message : 'Vui lòng kiểm tra mạng.'), 'error');
+          }
+        } else {
+          showToast('Bạn chưa đăng nhập Google nên kết quả chưa thể đồng bộ lên đám mây.', 'info');
+        }
 
-        const globalList = loadGlobalScores();
-        globalList.unshift(record);
-        saveGlobalScores(globalList);
-
-        // Tự động gửi ngầm dữ liệu JSON tới Google Apps Script Web App URL
+        // Tùy chọn gửi thêm về Google Sheets nếu người dùng cấu hình GOOGLE_SCRIPT_URL
         if (GOOGLE_SCRIPT_URL && GOOGLE_SCRIPT_URL.startsWith('http')) {
           try {
             fetch(GOOGLE_SCRIPT_URL, {
@@ -1434,34 +1609,67 @@
               mode: 'no-cors',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                fullName: record.fullName,
-                className: record.className,
-                email: record.email,
-                teacherName: record.teacherName,
-                examTitle: record.examTitle,
-                correctCount: record.correctCount,
-                score: record.score
+                fullName: payload.fullName,
+                className: payload.className,
+                email: payload.email,
+                teacherName: payload.teacherName,
+                examTitle: payload.examTitle,
+                correctCount: payload.correctCount,
+                score: payload.score
               })
             }).catch(() => {});
           } catch (e) {
-            // Bỏ qua lỗi mạng nền để không gián đoạn trải nghiệm sinh viên
+            // Bỏ qua lỗi webhook nền
           }
         }
-        return record;
+        return payload;
       }
 
       function getAccountAttemptHistory() {
-        const u = getCurrentUser();
-        const email = u.email;
-        const combined = [].concat(state.attemptHistory || [], loadGlobalScores());
-        const map = new Map();
-        combined.forEach((item) => {
-          if (!item || !item.id) return;
-          if (email && (item.email || '').toLowerCase() !== email) return;
-          if (!map.has(item.id)) map.set(item.id, item);
-        });
-        return Array.from(map.values()).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+        if (!firebaseAuthState.signedIn || !firebaseAuthState.uid) return [];
+        // Chỉ trả về dữ liệu thuộc chính tài khoản đang đăng nhập từ Firestore
+        return firebaseStudentAttempts
+          .filter((item) => item && item.uid === firebaseAuthState.uid)
+          .slice()
+          .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
       }
+
+      window.onFirebaseAuthReady = function (info) {
+        firebaseAuthState = Object.assign({ ready: true, adminLevel: 0 }, info);
+        if (info.signedIn) {
+          const email = (info.email || '').toLowerCase();
+          const profile = info.profile;
+          const prev = state.user || {};
+          const resolvedRole = info.isAdmin ? 'teacher' : 'student';
+          state.user = {
+            fullName: (profile && profile.fullName) || (prev.email === email ? prev.fullName : '') || info.displayName || '',
+            email,
+            role: resolvedRole,
+            className: (profile && profile.className) || (prev.email === email ? prev.className : '') || '',
+            teacherName: (profile && profile.teacherName) || (prev.email === email ? prev.teacherName : '') || (resolvedRole === 'teacher' ? (info.displayName || 'Giảng viên') : '')
+          };
+          state.studentName = state.user.fullName;
+          state.studentClass = state.user.className;
+          saveState();
+        } else {
+          adminUnlocked = false;
+          firebaseAdminAttempts = [];
+          firebaseStudentAttempts = [];
+        }
+        updateLoginGoogleSection();
+        updateNavbarUserBadge();
+        if (isLoggedIn()) {
+          closeLoginGate();
+        } else {
+          openLoginGate(true);
+        }
+        renderCurrentTab();
+      };
+
+      window.onStudentAttemptsUpdate = function (list) {
+        firebaseStudentAttempts = Array.isArray(list) ? list : [];
+        if (currentTab === 'history') renderHistoryTab();
+      };
 
       function refreshDailyStreak() {
         const today = getTodayKey();
@@ -1927,6 +2135,7 @@
         else if (currentTab === 'notebook') renderNotebookTab();
         else if (currentTab === 'mistakes') renderMistakesTab();
         else if (currentTab === 'history') renderHistoryTab();
+        else if (currentTab === 'admin') renderAdminTab();
       }
 
       function selectLesson(id) {
@@ -2135,8 +2344,8 @@
                 <button type="button" onclick="logoutAccount()" class="text-xs font-bold text-[#FF7A2F] underline underline-offset-2 cursor-pointer">Đổi tài khoản</button>
               </div>
               <div class="flex flex-wrap items-center gap-2.5">
-                ${u.role === 'teacher'
-                  ? `<button type="button" onclick="renderTeacherCornerModal()" class="study-btn px-5 py-2.5 bg-[#28C76F] hover:bg-[#20B361] text-white text-sm font-extrabold">Mở Bảng Điểm Sinh Viên →</button>`
+                ${firebaseAuthState.isAdmin
+                  ? `<button type="button" onclick="openAdminTabOrGate()" class="study-btn px-5 py-2.5 bg-[#28C76F] hover:bg-[#20B361] text-white text-sm font-extrabold">Mở Khu Vực Quản Trị →</button>`
                   : `<button type="button" onclick="switchTab('game')" class="study-btn px-5 py-2.5 bg-[#28C76F] hover:bg-[#20B361] text-white text-sm font-extrabold">Luyện game 6 bài →</button>`
                 }
                 <button type="button" onclick="switchTab('exam')" class="study-btn px-4 py-2.5 bg-[#FF7A2F] hover:bg-[#F0681D] text-white text-sm font-extrabold">
@@ -2362,7 +2571,9 @@
           earnedCoins: 0,
           answered: false,
           selectedLetter: null,
-          finished: false
+          finished: false,
+          startedAt: Date.now(),
+          questionRecords: {}
         };
         playSound('click');
         renderGameTab();
@@ -2375,6 +2586,15 @@
         gameSession.selectedLetter = letter;
 
         const isCorrect = letter === q.ans;
+        gameSession.questionRecords[gameSession.index] = {
+          q: q.question,
+          options: q.options,
+          chosen: letter,
+          ans: q.ans,
+          isRight: isCorrect,
+          explain: q.explain || '',
+          lessonId: q.lessonId
+        };
         if (isCorrect) {
           gameSession.combo += 1;
           if (gameSession.combo > gameSession.maxCombo) gameSession.maxCombo = gameSession.combo;
@@ -2405,10 +2625,31 @@
           gameSession.finished = true;
           if (!gameSession.recorded) {
             gameSession.recorded = true;
+            const durationSeconds = Math.max(1, Math.round((Date.now() - (gameSession.startedAt || Date.now())) / 1000));
+            const details = gameSession.questions.map((q, idx) => {
+              const rec = gameSession.questionRecords[idx];
+              if (rec) return rec;
+              return {
+                q: q.question,
+                options: q.options,
+                chosen: null,
+                ans: q.ans,
+                isRight: false,
+                explain: q.explain || '',
+                lessonId: q.lessonId
+              };
+            });
+            const wrongCount = details.filter((d) => d.chosen && !d.isRight).length;
+            const skippedCount = details.filter((d) => !d.chosen).length;
             recordAndSyncScore({
               examTitle: gameSession.title,
+              mode: 'game',
               correct: gameSession.correctCount,
-              total: gameSession.questions.length
+              wrong: wrongCount,
+              skipped: skippedCount,
+              total: gameSession.questions.length,
+              durationSeconds,
+              details
             });
           }
           if (gameSession.hp > 0 && gameSession.correctCount > 0) {
@@ -2816,10 +3057,29 @@
           saveState();
         }
 
+        const details = examSession.questions.map((q, idx) => {
+          const chosen = examSession.answers[idx] || null;
+          return {
+            q: q.question,
+            options: q.options,
+            chosen,
+            ans: q.ans,
+            isRight: chosen === q.ans,
+            explain: q.explain || '',
+            lessonId: q.lessonId
+          };
+        });
+        const durationSeconds = Math.max(1, 3600 - examSession.secondsLeft);
+
         recordAndSyncScore({
           examTitle: examSession.title,
+          mode: 'exam',
           correct,
-          total
+          wrong,
+          skipped,
+          total,
+          durationSeconds,
+          details
         });
 
         examSession.result = {
@@ -3452,7 +3712,7 @@
       }
 
       // =========================================================================
-      // 12. TAB 6: LỊCH SỬ LÀM BÀI CÁ NHÂN
+      // 12. TAB 6: LỊCH SỬ LÀM BÀI CÁ NHÂN (ĐỒNG BỘ TRỰC TUYẾN THEO TÀI KHOẢN)
       // =========================================================================
       function renderHistoryTab() {
         const container = document.getElementById('view-history');
@@ -3477,7 +3737,7 @@
           <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
             <div>
               <p class="text-xs font-extrabold text-[#2B88FF]">
-                Tài khoản: ${escapeHtml(u.fullName || 'Chưa đăng nhập')}${u.email ? ` (${escapeHtml(u.email)})` : ''}
+                Tài khoản riêng tư: ${escapeHtml(u.fullName || 'Chưa đăng nhập')}${u.email ? ` (${escapeHtml(u.email)})` : ''} · Đồng bộ trực tuyến đa thiết bị
               </p>
               <h2 class="text-2xl sm:text-3xl font-extrabold text-[#1E293B] tracking-tight">📜 Lịch sử làm bài</h2>
             </div>
@@ -3513,7 +3773,7 @@
             <div class="study-card p-10 text-center bg-[#EBF4FF]">
               <h3 class="text-lg sm:text-xl font-extrabold text-[#1E293B] mb-2">Bạn chưa hoàn thành lượt làm bài nào!</h3>
               <p class="text-sm text-slate-700 max-w-md mx-auto mb-5">
-                Hãy tham gia luyện game 6 bài hoặc thử sức với đề thi thử 50 câu để ghi nhận kết quả và tự động gửi điểm tới giáo viên nhé.
+                Mọi lượt làm bài của bạn sẽ được lưu trực tuyến theo thời gian thực và chỉ hiển thị cho riêng tài khoản của bạn cùng Giảng viên hướng dẫn.
               </p>
               <button type="button" onclick="switchTab('game')" class="study-btn px-6 py-3 bg-[#FF7A2F] hover:bg-[#F0681D] text-white text-sm font-extrabold">
                 Bắt đầu luyện tập ngay →
@@ -3526,28 +3786,39 @@
                 <table class="w-full text-left border-collapse">
                   <thead>
                     <tr class="bg-[#F8FAFC] border-b-2 border-[#1E293B] text-xs font-extrabold uppercase text-[#1E293B]">
-                      <th class="py-3.5 px-4 whitespace-nowrap">Thời gian hoàn thành</th>
+                      <th class="py-3.5 px-4 whitespace-nowrap">Ngày giờ hoàn thành</th>
                       <th class="py-3.5 px-4">Tên chuyên đề / Bài thi</th>
-                      <th class="py-3.5 px-4 whitespace-nowrap">Số câu đúng</th>
+                      <th class="py-3.5 px-4 whitespace-nowrap">Đúng / Sai</th>
+                      <th class="py-3.5 px-4 whitespace-nowrap">Thời gian làm bài</th>
                       <th class="py-3.5 px-4 whitespace-nowrap">Điểm (Thang 10)</th>
-                      <th class="py-3.5 px-4 whitespace-nowrap">Trạng thái đồng bộ</th>
+                      <th class="py-3.5 px-4 whitespace-nowrap">Đồng bộ</th>
+                      <th class="py-3.5 px-4 whitespace-nowrap">Chi tiết</th>
                     </tr>
                   </thead>
                   <tbody class="divide-y divide-[#E2E8F0] text-sm">
                     ${records
                       .map((r) => {
                         const s = Number(r.score) || 0;
+                        const wrongTotal = (Number(r.wrong) || 0) + (Number(r.skipped) || 0);
                         return `
                         <tr class="hover:bg-[#F8FAFC]/80 transition-colors">
-                          <td class="py-3.5 px-4 font-mono text-xs font-bold text-slate-600 whitespace-nowrap">${escapeHtml(r.dateTimeStr || formatDateTimeVN(r.timestamp))}</td>
+                          <td class="py-3.5 px-4 font-mono text-xs font-bold text-slate-600 whitespace-nowrap">${escapeHtml(formatDateTimeVN(r.timestamp))}</td>
                           <td class="py-3.5 px-4 font-extrabold text-[#1E293B]">${escapeHtml(r.examTitle)}</td>
-                          <td class="py-3.5 px-4 font-mono font-bold text-[#1E293B] whitespace-nowrap tabular-nums">${escapeHtml(r.correctCount || `${r.correct}/${r.total} câu`)}</td>
+                          <td class="py-3.5 px-4 font-mono text-xs font-bold whitespace-nowrap tabular-nums">
+                            <span class="text-[#15803D]">${r.correct} đúng</span> · <span class="text-rose-700">${wrongTotal} sai/trống</span>
+                          </td>
+                          <td class="py-3.5 px-4 font-mono text-xs font-bold text-slate-700 whitespace-nowrap">${escapeHtml(formatDurationVN(r.durationSeconds))}</td>
                           <td class="py-3.5 px-4 whitespace-nowrap">
                             <span class="inline-block px-3 py-1 rounded-xl border-2 font-mono text-xs font-extrabold tabular-nums ${scoreBadgeClass(s)}">
-                              ${s.toFixed(1)} điểm
+                              ${s.toFixed(2)} điểm
                             </span>
                           </td>
-                          <td class="py-3.5 px-4 text-xs font-bold text-[#15803D] whitespace-nowrap">${escapeHtml(r.syncStatus || `✅ Đã gửi tới GV ${r.teacherName || 'Cô Trang'}`)}</td>
+                          <td class="py-3.5 px-4 text-xs font-bold text-[#15803D] whitespace-nowrap">${escapeHtml(r.syncStatus || '☁️ Đã đồng bộ trực tuyến')}</td>
+                          <td class="py-3.5 px-4 whitespace-nowrap">
+                            <button type="button" onclick="openAttemptDetailModal('${escapeHtml(r.id)}', 'student')" class="px-2.5 py-1 rounded-lg border-2 border-[#1E293B] bg-[#EBF4FF] hover:bg-[#2B88FF] text-[#1D4ED8] hover:text-white text-xs font-extrabold cursor-pointer">
+                              Xem chi tiết
+                            </button>
+                          </td>
                         </tr>
                       `;
                       })
@@ -3562,54 +3833,147 @@
       }
 
       // =========================================================================
-      // 13. GÓC GIÁO VIÊN (PIN: 2026) & XUẤT EXCEL / CSV
+      // 13. MỤC QUẢN TRỊ GIẢNG VIÊN (BẢO MẬT MẬT KHẨU SERVER + REAL-TIME FIRESTORE)
       // =========================================================================
-      function openTeacherCornerPinModal() {
-        openModal(`
-          <div class="flex items-start justify-between gap-3 mb-4">
-            <div>
-              <p class="text-[11px] font-extrabold uppercase tracking-wider text-[#28C76F]">Khu vực quản lý giáo viên</p>
-              <h3 class="text-lg font-extrabold text-[#1E293B]">Mở khóa Góc Giáo Viên</h3>
-            </div>
-            <button type="button" onclick="closeModal()" class="px-2.5 py-1 rounded-lg border-2 border-[#1E293B] bg-white text-xs font-extrabold text-[#1E293B]">Đóng</button>
-          </div>
-          <form onsubmit="verifyTeacherPin(event)" class="space-y-3">
-            <div>
-              <label for="teacher-pin-input" class="block text-xs font-bold text-slate-700 mb-1.5">Nhập mã PIN giáo viên (mặc định: 2026):</label>
-              <input id="teacher-pin-input" type="password" inputmode="numeric" placeholder="Nhập PIN..." class="w-full px-3.5 py-2.5 rounded-xl border-2 border-[#1E293B] text-sm font-mono font-bold bg-white text-[#1E293B]" />
-            </div>
-            <p id="teacher-pin-error" class="hidden text-xs font-bold text-rose-700"></p>
-            <div class="flex items-center justify-end gap-2.5 pt-1">
-              <button type="button" onclick="closeModal()" class="study-btn px-4 py-2 bg-white text-sm font-extrabold text-[#1E293B]">Hủy</button>
-              <button type="submit" class="study-btn px-4 py-2 bg-[#28C76F] hover:bg-[#20B361] text-white text-sm font-extrabold">Mở bảng điểm →</button>
-            </div>
-          </form>
-        `);
-        setTimeout(() => {
-          const pinInput = document.getElementById('teacher-pin-input');
-          if (pinInput) pinInput.focus();
-        }, 40);
+      async function openAdminTabOrGate() {
+        switchTab('admin');
       }
 
-      function verifyTeacherPin(e) {
+      function renderTeacherCornerModal() {
+        openAdminTabOrGate();
+      }
+
+      async function verifyAdminAndLoad() {
+        if (!window.LiteraryFirebase) return;
+        const okSession = await window.LiteraryFirebase.isAdminSessionUnlocked();
+        adminUnlocked = okSession;
+        if (adminUnlocked && firebaseAuthState.isAdmin) {
+          window.LiteraryFirebase.subscribeAllAttemptsForAdmin(
+            (list) => {
+              firebaseAdminAttempts = Array.isArray(list) ? list : [];
+              if (currentTab === 'admin') renderAdminTab();
+            },
+            (errMsg) => {
+              showToast(errMsg, 'error');
+            }
+          );
+        } else {
+          try {
+            adminStatusInfo = await window.LiteraryFirebase.getAdminAuthStatus();
+          } catch (err) {
+            adminStatusInfo = { configured: true, mode: 'env' };
+          }
+        }
+        if (currentTab === 'admin') renderAdminTab();
+      }
+
+      async function handleAdminPasswordSubmit(e) {
         e.preventDefault();
-        const pinInput = document.getElementById('teacher-pin-input');
-        const errEl = document.getElementById('teacher-pin-error');
-        const val = pinInput ? pinInput.value.trim() : '';
-        if (val !== TEACHER_PIN) {
+        const input = document.getElementById('admin-password-input');
+        const errEl = document.getElementById('admin-password-error');
+        const btn = document.getElementById('admin-password-submit-btn');
+        const pwd = input ? input.value.trim() : '';
+
+        if (errEl) {
+          errEl.textContent = '';
+          errEl.classList.add('hidden');
+        }
+        if (!pwd) {
           if (errEl) {
-            errEl.textContent = 'Mã PIN không đúng. Vui lòng nhập lại (PIN: 2026).';
+            errEl.textContent = 'Vui lòng nhập mật khẩu quản trị.';
             errEl.classList.remove('hidden');
           }
           return;
         }
-        renderTeacherCornerModal();
+        if (!window.LiteraryFirebase) return;
+
+        try {
+          if (btn) btn.disabled = true;
+          const res = adminStatusInfo.mode === 'claim_required'
+            ? await window.LiteraryFirebase.claimAdminPassword(pwd)
+            : await window.LiteraryFirebase.verifyAdminPassword(pwd);
+
+          if (!res.ok) {
+            if (errEl) {
+              errEl.textContent = res.error || 'Mật khẩu quản trị chưa chính xác.';
+              errEl.classList.remove('hidden');
+            }
+            return;
+          }
+          adminUnlocked = true;
+          playSound('win');
+          showToast('Đã mở khóa Khu vực Quản trị Giảng viên!', 'success');
+          if (firebaseAuthState.isAdmin) {
+            window.LiteraryFirebase.subscribeAllAttemptsForAdmin(
+              (list) => {
+                firebaseAdminAttempts = Array.isArray(list) ? list : [];
+                if (currentTab === 'admin') renderAdminTab();
+              },
+              (errMsg) => {
+                showToast(errMsg, 'error');
+              }
+            );
+          }
+          renderAdminTab();
+        } finally {
+          if (btn) btn.disabled = false;
+        }
       }
 
-      function renderTeacherCornerModal(filterQuery = '') {
-        const allScores = loadGlobalScores();
-        const q = (filterQuery || '').trim().toLowerCase();
-        const filtered = allScores.filter((r) => {
+      function lockAdminDashboard() {
+        adminUnlocked = false;
+        firebaseAdminAttempts = [];
+        if (window.LiteraryFirebase) {
+          window.LiteraryFirebase.lockAdminSession();
+        }
+        showToast('Đã khóa khu vực Quản trị.', 'info');
+        renderAdminTab();
+      }
+
+      async function handleGrantAdminSubmit(e) {
+        e.preventDefault();
+        const uidEl = document.getElementById('grant-admin-uid');
+        const emailEl = document.getElementById('grant-admin-email');
+        const uidVal = uidEl ? uidEl.value.trim() : '';
+        const emailVal = emailEl ? emailEl.value.trim().toLowerCase() : '';
+        if (!window.LiteraryFirebase) return;
+        try {
+          await window.LiteraryFirebase.grantAdminAccess(uidVal, emailVal);
+          if (uidEl) uidEl.value = '';
+          if (emailEl) emailEl.value = '';
+          showToast(`Đã cấp quyền Giảng viên cho ${emailVal}!`, 'success');
+        } catch (err) {
+          showToast(err && err.message ? err.message : 'Không thể cấp quyền.', 'error');
+        }
+      }
+
+      function computeStudentAttemptMeta(allList) {
+        // Đếm tổng số lượt & số thứ tự từng lượt của mỗi sinh viên (theo uid hoặc email)
+        const byStudent = new Map();
+        const asc = allList.slice().sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+        const metaById = new Map();
+        asc.forEach((r) => {
+          const key = (r.uid || r.email || r.fullName || 'unknown').toLowerCase();
+          const nextIdx = (byStudent.get(key) || 0) + 1;
+          byStudent.set(key, nextIdx);
+          metaById.set(r.id, { attemptOrder: nextIdx, studentKey: key });
+        });
+        const result = new Map();
+        metaById.forEach((v, id) => {
+          result.set(id, {
+            attemptOrder: v.attemptOrder,
+            totalForStudent: byStudent.get(v.studentKey) || v.attemptOrder
+          });
+        });
+        return result;
+      }
+
+      function getFilteredAdminAttempts() {
+        const q = (adminFilters.query || '').trim().toLowerCase();
+        return firebaseAdminAttempts.filter((r) => {
+          if (adminFilters.className !== 'all' && (r.className || '') !== adminFilters.className) return false;
+          if (adminFilters.examTitle !== 'all' && (r.examTitle || '') !== adminFilters.examTitle) return false;
+          if (adminFilters.mode !== 'all' && (r.mode || 'game') !== adminFilters.mode) return false;
           if (!q) return true;
           return (
             (r.fullName || '').toLowerCase().includes(q) ||
@@ -3618,102 +3982,413 @@
             (r.examTitle || '').toLowerCase().includes(q)
           );
         });
-        const uniqueStudents = new Set(allScores.map((r) => (r.email || r.fullName || '').toLowerCase())).size;
-        const avgAll = allScores.length > 0
-          ? (allScores.reduce((s, r) => s + (Number(r.score) || 0), 0) / allScores.length).toFixed(2)
-          : '0.00';
+      }
 
+      function updateAdminFilter(key, value) {
+        adminFilters[key] = value;
+        const wrap = document.getElementById('admin-table-wrap');
+        if (wrap) {
+          wrap.innerHTML = renderAdminTableHtml();
+        } else {
+          renderAdminTab();
+        }
+      }
+
+      function confirmDeleteAdminAttempt(attemptId) {
+        if (firebaseAuthState.adminLevel !== 1) {
+          showToast('Chỉ Quản trị Mức 1 mới có quyền xóa lượt làm bài.', 'error');
+          return;
+        }
+        const safeId = escapeHtml(attemptId);
         openModal(`
-          <div class="flex flex-wrap items-start justify-between gap-3 mb-4">
-            <div>
-              <p class="text-[11px] font-extrabold uppercase tracking-wider text-[#2B88FF]">Góc Giáo Viên · Tổng hợp trên thiết bị</p>
-              <h3 class="text-xl font-extrabold text-[#1E293B]">Bảng điểm sinh viên (${allScores.length} lượt)</h3>
-            </div>
-            <button type="button" onclick="closeModal()" class="px-2.5 py-1 rounded-lg border-2 border-[#1E293B] bg-white text-xs font-extrabold text-[#1E293B]">Đóng</button>
+          <h3 class="text-lg font-extrabold text-[#1E293B] mb-2">Xác nhận xóa lượt làm bài?</h3>
+          <p class="text-sm text-slate-700 mb-5">Thao tác này chỉ dành cho Quản trị Mức 1 và sẽ xóa vĩnh viễn lượt làm bài này khỏi hệ thống.</p>
+          <div class="flex items-center justify-end gap-3">
+            <button type="button" onclick="closeModal()" class="study-btn px-4 py-2 bg-white text-sm font-extrabold text-[#1E293B]">Hủy</button>
+            <button type="button" onclick="executeDeleteAdminAttempt('${safeId}')" class="study-btn px-4 py-2 bg-rose-600 text-sm font-extrabold text-white">Xóa vĩnh viễn</button>
           </div>
+        `);
+      }
 
-          <div class="grid grid-cols-3 gap-2.5 mb-4">
-            <div class="p-3 rounded-xl border-2 border-[#1E293B] bg-[#EBF4FF]">
-              <p class="text-[11px] font-bold text-[#2B88FF]">Tổng lượt nộp</p>
-              <p class="text-lg font-mono font-extrabold text-[#1E293B]">${allScores.length}</p>
-            </div>
-            <div class="p-3 rounded-xl border-2 border-[#1E293B] bg-[#FFF3EB]">
-              <p class="text-[11px] font-bold text-[#C2410C]">Số sinh viên</p>
-              <p class="text-lg font-mono font-extrabold text-[#1E293B]">${uniqueStudents}</p>
-            </div>
-            <div class="p-3 rounded-xl border-2 border-[#1E293B] bg-[#EAFBF1]">
-              <p class="text-[11px] font-bold text-[#15803D]">Điểm TB chung</p>
-              <p class="text-lg font-mono font-extrabold text-[#1E293B]">${avgAll}</p>
-            </div>
-          </div>
+      async function executeDeleteAdminAttempt(attemptId) {
+        if (!window.LiteraryFirebase) return;
+        try {
+          await window.LiteraryFirebase.deleteAttempt(attemptId);
+          closeModal();
+          showToast('Đã xóa lượt làm bài khỏi Firestore.', 'success');
+        } catch (err) {
+          showToast(err && err.message ? err.message : 'Không thể xóa lượt làm bài.', 'error');
+        }
+      }
 
-          <div class="flex flex-col sm:flex-row gap-2.5 mb-4">
-            <input type="text" value="${escapeHtml(filterQuery)}" oninput="renderTeacherCornerModal(this.value)" placeholder="Tìm theo tên SV, lớp, email hoặc bài thi..." class="flex-1 px-3 py-2 rounded-xl border-2 border-[#1E293B] text-xs font-semibold bg-white text-[#1E293B]" />
-            <button type="button" ${allScores.length === 0 ? 'disabled' : ''} onclick="exportTeacherScoresCsv()" class="study-btn px-4 py-2 bg-[#28C76F] hover:bg-[#20B361] text-white text-xs font-extrabold whitespace-nowrap">
-              Xuất file Excel / CSV ↓
-            </button>
-          </div>
-
-          ${
-            filtered.length === 0
-              ? `<div class="p-6 rounded-2xl border-2 border-[#1E293B] bg-[#F8FAFC] text-center text-xs font-semibold text-slate-600">Chưa có dữ liệu điểm phù hợp trên thiết bị này.</div>`
-              : `
-            <div class="max-h-72 overflow-y-auto rounded-2xl border-2 border-[#1E293B]">
-              <table class="w-full text-left border-collapse text-xs">
-                <thead class="sticky top-0 bg-[#F8FAFC] border-b-2 border-[#1E293B] font-extrabold text-[#1E293B]">
-                  <tr>
-                    <th class="p-2.5">Sinh viên</th>
-                    <th class="p-2.5">Lớp</th>
-                    <th class="p-2.5">Bài thi / Chuyên đề</th>
-                    <th class="p-2.5">Đúng</th>
-                    <th class="p-2.5">Điểm</th>
-                    <th class="p-2.5">Thời gian</th>
+      function renderAdminTableHtml() {
+        const allScores = firebaseAdminAttempts;
+        const metaMap = computeStudentAttemptMeta(allScores);
+        const filtered = getFilteredAdminAttempts();
+        const isLevel1 = firebaseAuthState.adminLevel === 1;
+        if (filtered.length === 0) {
+          return `<div class="study-card p-10 text-center bg-white text-sm font-semibold text-slate-600">Chưa có dữ liệu làm bài nào khớp với bộ lọc hiện tại.</div>`;
+        }
+        return `
+          <div class="study-card overflow-hidden mb-6">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                <thead>
+                  <tr class="bg-[#F8FAFC] border-b-2 border-[#1E293B] text-xs font-extrabold uppercase text-[#1E293B]">
+                    <th class="py-3 px-3.5 whitespace-nowrap">Họ tên / Tên</th>
+                    <th class="py-3 px-3.5 whitespace-nowrap">Lớp</th>
+                    <th class="py-3 px-3.5 whitespace-nowrap">Số lượt làm bài</th>
+                    <th class="py-3 px-3.5">Bài thi / Chuyên đề</th>
+                    <th class="py-3 px-3.5 whitespace-nowrap">Số câu đúng / sai</th>
+                    <th class="py-3 px-3.5 whitespace-nowrap">Thời gian làm bài</th>
+                    <th class="py-3 px-3.5 whitespace-nowrap">Điểm số</th>
+                    <th class="py-3 px-3.5 whitespace-nowrap">Ngày giờ hoàn thành</th>
+                    <th class="py-3 px-3.5 whitespace-nowrap">Thao tác</th>
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-[#E2E8F0]">
                   ${filtered
-                    .map(
-                      (r) => `
-                    <tr class="hover:bg-[#F8FAFC]">
-                      <td class="p-2.5">
-                        <p class="font-extrabold text-[#1E293B]">${escapeHtml(r.fullName)}</p>
-                        <p class="text-[10px] text-slate-500">${escapeHtml(r.email)}</p>
-                      </td>
-                      <td class="p-2.5 font-bold">${escapeHtml(r.className || '-')}</td>
-                      <td class="p-2.5 font-semibold text-[#1E293B]">${escapeHtml(r.examTitle)}</td>
-                      <td class="p-2.5 font-mono font-bold whitespace-nowrap">${escapeHtml(r.correctCount)}</td>
-                      <td class="p-2.5 font-mono font-extrabold text-[#2B88FF] whitespace-nowrap">${Number(r.score || 0).toFixed(1)}</td>
-                      <td class="p-2.5 font-mono text-[10px] text-slate-500 whitespace-nowrap">${escapeHtml(r.dateTimeStr)}</td>
-                    </tr>
-                  `
-                    )
+                    .map((r) => {
+                      const meta = metaMap.get(r.id) || { attemptOrder: 1, totalForStudent: 1 };
+                      const wrongTotal = (Number(r.wrong) || 0) + (Number(r.skipped) || 0);
+                      const s = Number(r.score) || 0;
+                      const badgeCls = s >= 8 ? 'bg-[#EAFBF1] text-[#15803D] border-[#28C76F]' : s >= 5 ? 'bg-[#EBF4FF] text-[#1D4ED8] border-[#2B88FF]' : 'bg-[#FFF1F2] text-rose-700 border-rose-500';
+                      return `
+                      <tr class="hover:bg-[#F8FAFC]">
+                        <td class="py-3 px-3.5">
+                          <p class="font-extrabold text-[#1E293B]">${escapeHtml(r.fullName)}</p>
+                          <p class="text-[11px] font-mono text-slate-500">${escapeHtml(r.email)}</p>
+                        </td>
+                        <td class="py-3 px-3.5 font-bold text-[#1E293B] whitespace-nowrap">${escapeHtml(r.className || '-')}</td>
+                        <td class="py-3 px-3.5 font-mono text-xs font-extrabold text-[#2B88FF] whitespace-nowrap">Lượt #${meta.attemptOrder} / Tổng ${meta.totalForStudent}</td>
+                        <td class="py-3 px-3.5 font-semibold text-[#1E293B]">${escapeHtml(r.examTitle)}</td>
+                        <td class="py-3 px-3.5 font-mono text-xs font-bold whitespace-nowrap tabular-nums">
+                          <span class="text-[#15803D]">${r.correct} đúng</span> / <span class="text-rose-700">${wrongTotal} sai</span>
+                        </td>
+                        <td class="py-3 px-3.5 font-mono text-xs font-bold text-slate-700 whitespace-nowrap">${escapeHtml(formatDurationVN(r.durationSeconds))}</td>
+                        <td class="py-3 px-3.5 whitespace-nowrap">
+                          <span class="inline-block px-2.5 py-1 rounded-lg border-2 font-mono text-xs font-extrabold tabular-nums ${badgeCls}">
+                            ${s.toFixed(2)}
+                          </span>
+                        </td>
+                        <td class="py-3 px-3.5 font-mono text-xs text-slate-600 whitespace-nowrap">${escapeHtml(formatDateTimeVN(r.timestamp))}</td>
+                        <td class="py-3 px-3.5 whitespace-nowrap">
+                          <div class="flex items-center gap-1.5">
+                            <button type="button" onclick="openAttemptDetailModal('${escapeHtml(r.id)}', 'admin')" class="px-2.5 py-1 rounded-lg border-2 border-[#1E293B] bg-[#FFF3EB] hover:bg-[#FF7A2F] text-[#C2410C] hover:text-white text-xs font-extrabold cursor-pointer">
+                              Xem chi tiết →
+                            </button>
+                            ${isLevel1 ? `<button type="button" onclick="confirmDeleteAdminAttempt('${escapeHtml(r.id)}')" class="px-2 py-1 rounded-lg border-2 border-[#1E293B] bg-[#FFF1F2] hover:bg-rose-600 text-rose-700 hover:text-white text-xs font-extrabold cursor-pointer">Xóa</button>` : ''}
+                          </div>
+                        </td>
+                      </tr>
+                    `;
+                    })
                     .join('')}
                 </tbody>
               </table>
+            </div>
+          </div>
+        `;
+      }
+
+      function openAttemptDetailModal(attemptId, source = 'admin') {
+        const list = source === 'admin' ? firebaseAdminAttempts : getAccountAttemptHistory();
+        const r = list.find((item) => item.id === attemptId);
+        if (!r) {
+          showToast('Không tìm thấy chi tiết lượt làm bài này.', 'error');
+          return;
+        }
+        const details = Array.isArray(r.details) ? r.details : [];
+        const letters = ['A', 'B', 'C', 'D'];
+        openModal(`
+          <div class="flex flex-wrap items-start justify-between gap-3 mb-4">
+            <div>
+              <p class="text-[11px] font-extrabold uppercase tracking-wider text-[#2B88FF]">Chi tiết lượt làm bài</p>
+              <h3 class="text-lg sm:text-xl font-extrabold text-[#1E293B]">${escapeHtml(r.examTitle)}</h3>
+              <p class="text-xs font-semibold text-slate-600 mt-1">
+                ${escapeHtml(r.fullName)}${r.className ? ` · Lớp ${escapeHtml(r.className)}` : ''} · ${escapeHtml(formatDateTimeVN(r.timestamp))}
+              </p>
+            </div>
+            <button type="button" onclick="closeModal()" class="px-3 py-1 rounded-lg border-2 border-[#1E293B] bg-white text-xs font-extrabold text-[#1E293B] cursor-pointer">Đóng</button>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-5">
+            <div class="p-3 rounded-xl border-2 border-[#1E293B] bg-[#EBF4FF]">
+              <p class="text-[11px] font-bold text-[#2B88FF]">Điểm số</p>
+              <p class="text-lg font-mono font-extrabold text-[#1E293B]">${Number(r.score || 0).toFixed(2)} / 10</p>
+            </div>
+            <div class="p-3 rounded-xl border-2 border-[#1E293B] bg-[#EAFBF1]">
+              <p class="text-[11px] font-bold text-[#15803D]">Số câu đúng</p>
+              <p class="text-lg font-mono font-extrabold text-[#1E293B]">${r.correct}/${r.total}</p>
+            </div>
+            <div class="p-3 rounded-xl border-2 border-[#1E293B] bg-[#FFF1F2]">
+              <p class="text-[11px] font-bold text-rose-700">Sai / Bỏ trống</p>
+              <p class="text-lg font-mono font-extrabold text-[#1E293B]">${r.wrong || 0} sai · ${r.skipped || 0} trống</p>
+            </div>
+            <div class="p-3 rounded-xl border-2 border-[#1E293B] bg-[#FFF3EB]">
+              <p class="text-[11px] font-bold text-[#C2410C]">Thời gian làm bài</p>
+              <p class="text-sm font-mono font-extrabold text-[#1E293B] mt-0.5">${escapeHtml(formatDurationVN(r.durationSeconds))}</p>
+            </div>
+          </div>
+
+          ${
+            details.length === 0
+              ? `<div class="p-6 rounded-2xl border-2 border-[#1E293B] bg-[#F8FAFC] text-center text-xs font-semibold text-slate-600">Lượt làm bài này không có dữ liệu chi tiết từng câu.</div>`
+              : `
+            <div class="space-y-3 max-h-[52vh] overflow-y-auto pr-1">
+              ${details
+                .map((d, idx) => {
+                  const isRight = Boolean(d.isRight);
+                  return `
+                  <div class="p-4 rounded-2xl border-2 border-[#1E293B] ${isRight ? 'bg-[#EAFBF1]/60' : 'bg-[#FFF1F2]/70'}">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                      <span class="text-xs font-extrabold text-[#1E293B]">Câu ${idx + 1}</span>
+                      <span class="px-2 py-0.5 rounded-lg border border-[#1E293B] text-[11px] font-extrabold ${isRight ? 'bg-[#EAFBF1] text-[#15803D]' : 'bg-[#FFF1F2] text-rose-700'}">
+                        ${isRight ? `Đúng ✓ (Chọn ${escapeHtml(d.chosen)})` : d.chosen ? `Sai ✕ (Chọn ${escapeHtml(d.chosen)} · Đúng ${escapeHtml(d.ans)})` : `Bỏ trống (Đúng ${escapeHtml(d.ans)})`}
+                      </span>
+                    </div>
+                    <p class="text-sm font-bold text-[#1E293B] mb-2">${escapeHtml(d.q)}</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-xs mb-2">
+                      ${(d.options || [])
+                        .map((opt, oIdx) => {
+                          const l = letters[oIdx];
+                          let cls = 'bg-white border-[#CBD5E1]';
+                          if (l === d.ans) cls = 'bg-[#EAFBF1] border-[#1E293B] font-bold';
+                          else if (l === d.chosen && !isRight) cls = 'bg-[#FFF1F2] border-rose-500';
+                          return `<div class="p-2 rounded-lg border ${cls}"><span class="font-mono font-bold mr-1">${l}.</span>${escapeHtml(opt)}</div>`;
+                        })
+                        .join('')}
+                    </div>
+                    ${d.explain ? `<p class="text-[11px] text-slate-700 bg-white/80 border border-[#CBD5E1] rounded-lg p-2"><strong>Giải thích:</strong> ${escapeHtml(d.explain)}</p>` : ''}
+                  </div>
+                `;
+                })
+                .join('')}
             </div>
           `
           }
         `);
       }
 
+      async function renderAdminTab() {
+        const container = document.getElementById('view-admin');
+        if (!container) return;
+
+        if (!firebaseAuthState.signedIn || !firebaseAuthState.isAdmin) {
+          container.innerHTML = `
+            <div class="max-w-lg mx-auto study-card p-6 sm:p-8 bg-white text-center space-y-4">
+              <h2 class="text-xl font-extrabold text-[#1E293B]">Khu vực chỉ dành cho Giảng viên</h2>
+              <p class="text-sm text-slate-600">
+                Sinh viên chỉ xem được kết quả và lịch sử làm bài cá nhân tại mục <span class="font-bold text-[#2B88FF]">📜 Lịch sử làm bài</span>.
+              </p>
+              <button type="button" onclick="switchTab('history')" class="study-btn px-5 py-2.5 bg-[#2B88FF] text-white text-sm font-extrabold">
+                Về Lịch sử làm bài →
+              </button>
+            </div>
+          `;
+          return;
+        }
+
+        // Kiểm tra phiên mật khẩu với server nếu chưa mở khóa
+        if (!adminUnlocked && window.LiteraryFirebase) {
+          const stillValid = await window.LiteraryFirebase.isAdminSessionUnlocked();
+          if (stillValid) {
+            adminUnlocked = true;
+            window.LiteraryFirebase.subscribeAllAttemptsForAdmin(
+              (list) => {
+                firebaseAdminAttempts = Array.isArray(list) ? list : [];
+                if (currentTab === 'admin') renderAdminTab();
+              },
+              (errMsg) => showToast(errMsg, 'error')
+            );
+          } else {
+            try {
+              adminStatusInfo = await window.LiteraryFirebase.getAdminAuthStatus();
+            } catch (e) {
+              // Ignore
+            }
+          }
+        }
+
+        if (!adminUnlocked) {
+          const isLevel1 = firebaseAuthState.adminLevel === 1;
+          const isClaim = adminStatusInfo.mode === 'claim_required';
+          const canClaim = isClaim && isLevel1;
+          container.innerHTML = `
+            <div class="max-w-lg mx-auto study-card p-6 sm:p-8 bg-white">
+              <div class="flex items-center gap-3 mb-4">
+                <div class="w-12 h-12 rounded-2xl border-2 border-[#1E293B] bg-[#EAFBF1] text-[#15803D] flex items-center justify-center text-xl font-extrabold shadow-[0_3px_0_#1E293B]">
+                  ${isLevel1 ? '👑' : '🛡️'}
+                </div>
+                <div>
+                  <p class="text-[11px] font-extrabold uppercase tracking-wider text-[#28C76F]">
+                    ${isLevel1 ? 'Quản trị Mức 1 · Quản trị viên chính' : 'Quản trị Mức 2 · Giáo viên @fpt.edu.vn'}
+                  </p>
+                  <h2 class="text-xl sm:text-2xl font-extrabold text-[#1E293B]">
+                    ${canClaim ? 'Thiết lập mật khẩu Quản trị lần đầu' : 'Xác thực mật khẩu Quản trị'}
+                  </h2>
+                </div>
+              </div>
+
+              ${isClaim && !isLevel1
+                ? `<div class="p-4 rounded-2xl border-2 border-[#1E293B] bg-[#FFF3EB] text-xs sm:text-sm font-semibold text-[#C2410C]">
+                    Hệ thống chưa khởi tạo mật khẩu Quản trị lần đầu. Vui lòng liên hệ Quản trị viên chính (Mức 1) để khởi tạo mật khẩu trước khi mở khóa Quản trị Mức 2.
+                  </div>`
+                : `
+                <p class="text-xs sm:text-sm text-slate-600 mb-4 leading-relaxed">
+                  ${canClaim
+                    ? 'Hệ thống chưa có mật khẩu Quản trị. Quản trị viên chính hãy đặt mật khẩu riêng (tối thiểu 6 ký tự) — mật khẩu sẽ được mã hóa an toàn trên máy chủ.'
+                    : isLevel1
+                      ? 'Vui lòng nhập mật khẩu Quản trị để mở toàn quyền quản trị (Mức 1).'
+                      : 'Tài khoản @fpt.edu.vn của bạn có quyền Quản trị Mức 2. Vui lòng nhập mật khẩu Quản trị để xem bảng điểm, lọc dữ liệu và xuất Excel.'}
+                </p>
+
+                <form onsubmit="handleAdminPasswordSubmit(event)" class="space-y-3.5">
+                  <div>
+                    <label for="admin-password-input" class="block text-xs font-extrabold text-[#1E293B] mb-1.5">
+                      ${canClaim ? 'Tạo mật khẩu Quản trị (tối thiểu 6 ký tự):' : 'Mật khẩu Quản trị:'}
+                    </label>
+                    <input id="admin-password-input" type="password" required placeholder="Nhập mật khẩu quản trị..." class="w-full px-3.5 py-2.5 rounded-xl border-2 border-[#1E293B] bg-white text-sm font-mono font-bold text-[#1E293B]" />
+                  </div>
+                  <p id="admin-password-error" class="hidden text-xs font-extrabold text-rose-700 bg-[#FFF1F2] border-2 border-rose-500 rounded-xl px-3 py-2"></p>
+                  <button id="admin-password-submit-btn" type="submit" class="study-btn w-full py-3 bg-[#28C76F] hover:bg-[#20B361] text-white text-sm font-extrabold uppercase tracking-wide">
+                    ${canClaim ? 'Lưu mật khẩu & Mở Quản trị →' : isLevel1 ? 'Mở khóa Quản trị Mức 1 →' : 'Mở khóa Quản trị Mức 2 →'}
+                  </button>
+                </form>
+              `}
+            </div>
+          `;
+          return;
+        }
+
+        const isLevel1 = firebaseAuthState.adminLevel === 1;
+        const allScores = firebaseAdminAttempts;
+        const filtered = getFilteredAdminAttempts();
+
+        const uniqueClasses = Array.from(new Set(allScores.map((r) => r.className).filter(Boolean))).sort();
+        const uniqueExams = Array.from(new Set(allScores.map((r) => r.examTitle).filter(Boolean))).sort();
+        const uniqueStudents = new Set(allScores.map((r) => (r.uid || r.email || r.fullName || '').toLowerCase())).size;
+        const avgAll = allScores.length > 0
+          ? (allScores.reduce((s, r) => s + (Number(r.score) || 0), 0) / allScores.length).toFixed(2)
+          : '0.00';
+        const passRate = allScores.length > 0
+          ? Math.round((allScores.filter((r) => (Number(r.score) || 0) >= 5).length / allScores.length) * 100)
+          : 0;
+
+        container.innerHTML = `
+          <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
+            <div>
+              <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border-2 border-[#1E293B] bg-[#EAFBF1] text-[11px] font-extrabold text-[#15803D] mb-2">
+                <span class="w-2 h-2 rounded-full bg-[#28C76F]"></span>
+                ${isLevel1 ? '👑 Quản trị Mức 1 · Toàn quyền hệ thống' : '🛡️ Quản trị Mức 2 · Giáo viên @fpt.edu.vn (Xem & Xuất báo cáo)'}
+              </div>
+              <h2 class="text-2xl sm:text-3xl font-extrabold text-[#1E293B] tracking-tight">🛡️ Quản trị bảng điểm sinh viên</h2>
+            </div>
+            <div class="flex flex-wrap items-center gap-2.5">
+              <button type="button" ${filtered.length === 0 ? 'disabled' : ''} onclick="exportTeacherScoresCsv()" class="study-btn px-4 py-2.5 bg-[#28C76F] hover:bg-[#20B361] text-white text-xs sm:text-sm font-extrabold whitespace-nowrap">
+                Xuất file Excel / CSV ↓
+              </button>
+              <button type="button" onclick="lockAdminDashboard()" class="study-btn px-4 py-2.5 bg-white text-[#1E293B] text-xs sm:text-sm font-extrabold whitespace-nowrap">
+                🔒 Khóa Quản trị
+              </button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div class="rounded-2xl border-2 border-[#1E293B] bg-[#2B88FF] text-white shadow-[0_4px_0_#1E293B] p-4">
+              <p class="text-xs font-extrabold uppercase text-white/90">Tổng số lượt làm bài</p>
+              <p class="text-2xl sm:text-3xl font-mono font-extrabold tabular-nums mt-1">${allScores.length}</p>
+            </div>
+            <div class="rounded-2xl border-2 border-[#1E293B] bg-[#FF7A2F] text-white shadow-[0_4px_0_#1E293B] p-4">
+              <p class="text-xs font-extrabold uppercase text-white/90">Số sinh viên tham gia</p>
+              <p class="text-2xl sm:text-3xl font-mono font-extrabold tabular-nums mt-1">${uniqueStudents}</p>
+            </div>
+            <div class="rounded-2xl border-2 border-[#1E293B] bg-[#28C76F] text-white shadow-[0_4px_0_#1E293B] p-4">
+              <p class="text-xs font-extrabold uppercase text-white/90">Điểm trung bình</p>
+              <p class="text-2xl sm:text-3xl font-mono font-extrabold tabular-nums mt-1">${avgAll} <span class="text-xs font-sans">/ 10</span></p>
+            </div>
+            <div class="rounded-2xl border-2 border-[#1E293B] bg-white text-[#1E293B] shadow-[0_4px_0_#1E293B] p-4">
+              <p class="text-xs font-extrabold uppercase text-slate-500">Tỷ lệ đạt (≥ 5.0 đ)</p>
+              <p class="text-2xl sm:text-3xl font-mono font-extrabold text-[#2B88FF] tabular-nums mt-1">${passRate}%</p>
+            </div>
+          </div>
+
+          <!-- Bộ lọc và tìm kiếm -->
+          <div class="study-card p-4 mb-5 bg-[#F8FAFC]">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              <input id="admin-search-input" type="text" value="${escapeHtml(adminFilters.query)}" oninput="updateAdminFilter('query', this.value)" placeholder="Tìm họ tên, lớp, email, tên đề..." class="px-3.5 py-2 rounded-xl border-2 border-[#1E293B] text-xs sm:text-sm font-semibold bg-white text-[#1E293B]" />
+              <select onchange="updateAdminFilter('className', this.value)" class="px-3 py-2 rounded-xl border-2 border-[#1E293B] text-xs sm:text-sm font-bold bg-white text-[#1E293B]">
+                <option value="all" ${adminFilters.className === 'all' ? 'selected' : ''}>Tất cả lớp</option>
+                ${uniqueClasses.map((c) => `<option value="${escapeHtml(c)}" ${adminFilters.className === c ? 'selected' : ''}>Lớp ${escapeHtml(c)}</option>`).join('')}
+              </select>
+              <select onchange="updateAdminFilter('examTitle', this.value)" class="px-3 py-2 rounded-xl border-2 border-[#1E293B] text-xs sm:text-sm font-bold bg-white text-[#1E293B]">
+                <option value="all" ${adminFilters.examTitle === 'all' ? 'selected' : ''}>Tất cả bài thi / chuyên đề</option>
+                ${uniqueExams.map((ex) => `<option value="${escapeHtml(ex)}" ${adminFilters.examTitle === ex ? 'selected' : ''}>${escapeHtml(ex)}</option>`).join('')}
+              </select>
+              <select onchange="updateAdminFilter('mode', this.value)" class="px-3 py-2 rounded-xl border-2 border-[#1E293B] text-xs sm:text-sm font-bold bg-white text-[#1E293B]">
+                <option value="all" ${adminFilters.mode === 'all' ? 'selected' : ''}>Tất cả chế độ</option>
+                <option value="exam" ${adminFilters.mode === 'exam' ? 'selected' : ''}>Phòng thi thử (50 câu)</option>
+                <option value="game" ${adminFilters.mode === 'game' ? 'selected' : ''}>Luyện game 6 bài</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="admin-table-wrap">
+            ${renderAdminTableHtml()}
+          </div>
+
+          ${isLevel1 ? `
+          <!-- Thêm đồng giảng viên quản trị (chỉ Mức 1) -->
+          <div class="study-card p-5 bg-white">
+            <h3 class="text-sm font-extrabold text-[#1E293B] mb-1">Cấp quyền Quản trị Mức 2 cho Email ngoài @fpt.edu.vn (tùy chọn — Chỉ Mức 1)</h3>
+            <p class="text-xs text-slate-600 mb-3">Mọi tài khoản giáo viên đuôi <span class="font-mono font-bold">@fpt.edu.vn</span> đã tự động có quyền Quản trị Mức 2 (cần mật khẩu). Mục này chỉ dùng nếu muốn cấp thêm cho email khác.</p>
+            <form onsubmit="handleGrantAdminSubmit(event)" class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+              <input id="grant-admin-uid" type="text" required placeholder="Firebase UID của giảng viên" class="px-3 py-2 rounded-xl border-2 border-[#1E293B] text-xs font-mono bg-white text-[#1E293B]" />
+              <input id="grant-admin-email" type="email" required placeholder="Email Google" class="px-3 py-2 rounded-xl border-2 border-[#1E293B] text-xs font-semibold bg-white text-[#1E293B]" />
+              <button type="submit" class="study-btn px-4 py-2 bg-[#2B88FF] hover:bg-[#1D74E8] text-white text-xs font-extrabold">Cấp quyền Mức 2</button>
+            </form>
+          </div>
+          ` : ''}
+        `;
+      }
+
       function exportTeacherScoresCsv() {
-        const list = loadGlobalScores();
+        const list = getFilteredAdminAttempts();
         if (!list.length) {
           showToast('Chưa có dữ liệu điểm để xuất file.', 'info');
           return;
         }
+        const metaMap = computeStudentAttemptMeta(firebaseAdminAttempts);
         const csvEscape = (v) => `"${String(v == null ? '' : v).replace(/"/g, '""')}"`;
-        const header = ['Thời gian', 'Họ và tên', 'Lớp', 'Gmail', 'Giáo viên', 'Bài thi / Chuyên đề', 'Số câu đúng', 'Điểm (Thang 10)'];
-        const rows = list.map((r) => [
-          r.dateTimeStr || formatDateTimeVN(r.timestamp),
-          r.fullName,
-          r.className,
-          r.email,
-          r.teacherName,
-          r.examTitle,
-          r.correctCount,
-          Number(r.score || 0).toFixed(2)
-        ]);
+        const header = [
+          'Ngày giờ hoàn thành',
+          'Họ tên / Tên',
+          'Lớp',
+          'Email',
+          'Số lượt làm bài',
+          'Bài thi / Chuyên đề',
+          'Số câu đúng',
+          'Số câu sai',
+          'Bỏ trống',
+          'Thời gian làm bài',
+          'Điểm (Thang 10)'
+        ];
+        const rows = list.map((r) => {
+          const meta = metaMap.get(r.id) || { attemptOrder: 1, totalForStudent: 1 };
+          return [
+            formatDateTimeVN(r.timestamp),
+            r.fullName,
+            r.className,
+            r.email,
+            `Lượt #${meta.attemptOrder}/${meta.totalForStudent}`,
+            r.examTitle,
+            r.correct,
+            r.wrong || 0,
+            r.skipped || 0,
+            formatDurationVN(r.durationSeconds),
+            Number(r.score || 0).toFixed(2)
+          ];
+        });
         const csvContent = '\uFEFF' + [header, ...rows].map((row) => row.map(csvEscape).join(',')).join('\r\n');
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
@@ -3753,7 +4428,7 @@
         closeModal();
         showToast('Đã đặt lại toàn bộ dữ liệu học tập.', 'info');
         switchTab('knowledge');
-        openLoginGate(false);
+        if (!isLoggedIn()) openLoginGate(false);
       }
 
       // Khởi tạo ứng dụng khi tải trang
@@ -3763,7 +4438,14 @@
         updateNavbarUserBadge();
         renderSoundIcon();
         switchTab('knowledge');
-        if (!isLoggedIn()) {
+        if (window.LiteraryFirebase) {
+          const authInfo = window.LiteraryFirebase.getAuthState();
+          if (authInfo && authInfo.signedIn) {
+            window.onFirebaseAuthReady(authInfo);
+          } else {
+            openLoginGate(true);
+          }
+        } else {
           openLoginGate(true);
         }
       })();
